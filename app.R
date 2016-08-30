@@ -121,9 +121,25 @@ ui = (fluidPage(
           rHandsontableOutput("inputVariables"),
           helpText(textOutput("inputHelper")),
           selectInput("levelAnalysis", label = h3("Select level of analysis"), 
-                      choices = list("transcript" = 1, "gene" = 2), selected = 1),
+                      choices = list("Transcript" = "trans", "Gene" = "gene"), selected = "trans"),
           selectInput("typeTest", label = h3("Select test"), 
-                      choices = list("likelihood" = 1, "wald" = 2), selected = 1),
+                      choices = list("Likelihood Ratio Test" = "lrt", "Wald Test" = "wald"), selected = "lrt"),
+          conditionalPanel(condition= "input.typeTest == 'lrt'",
+                           helpText("The likelihood ratio test is a statistical test used to compare the goodness of fit of 
+                                    two models, one of which (the null model) is a special case of the other 
+                                    (the alternative model). The test is based on the likelihood ratio, 
+                                    which expresses how many times more likely the data are under one model 
+                                    than the other. This likelihood ratio, or equivalently its logarithm, can then 
+                                    be used to compute a p-value, or compared to a critical value to decide whether 
+                                    to reject the null model in favour of the alternative model. When the logarithm of 
+                                    the likelihood ratio is used, the statistic is known as a log-likelihood ratio 
+                                    statistic, and the probability distribution of this test statistic, assuming that 
+                                    the null model is true, can be approximated using Wilks’ theorem.")),
+          conditionalPanel(condition= "input.typeTest == 'wald'",
+                           helpText("The Wald test is a parametric statistical test named after the Hungarian statistician 
+                                    Abraham Wald. Whenever a relationship within or between data items can be expressed as 
+                                    a statistical model with parameters to be estimated from a sample, the Wald test can be 
+                                    used to test the true value of the parameter based on the sample estimate.")),
           actionButton("startProcess", "Process"),
           actionButton("goButton", "Go!"),
           actionButton("goButton", "Go!")
