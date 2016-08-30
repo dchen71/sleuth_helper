@@ -28,7 +28,9 @@ server = (function(input, output, session) {
           DF[sapply(DF, is.logical)] = lapply(DF[sapply(DF, is.logical)], as.character)
           
           input_data = hot_to_r(input$nameVar)
-          names(DF) = c("GENENAME", input_data$'Variable Names')
+          if(length(names(DF)) == length(c("GENENAME", input_data$'Variable Names'))){
+            names(DF) = c("GENENAME", input_data$'Variable Names')
+          }
           
           if (!is.null(DF))
             rhandsontable(DF, stretchH = "all") %>%
@@ -80,7 +82,14 @@ ui = (fluidPage(
         column(
           width = 10,
           offset = 1,
-          rHandsontableOutput("hot")
+          rHandsontableOutput("hot"),
+          selectInput("levelAnalysis", label = h3("Select level of analysis"), 
+                      choices = list("transcript" = 1, "gene" = 2), selected = 1),
+          selectInput("typeTest", label = h3("Select test"), 
+                      choices = list("likelihood" = 1, "wald" = 2), selected = 1),
+          actionButton("startProcess", "Process"),
+          actionButton("goButton", "Go!"),
+          actionButton("goButton", "Go!")
           
           #Want to show up table to create dataframe for conditions and a submit so it can save whatever it is
           #Want to choose transcript/gene level afterwards
