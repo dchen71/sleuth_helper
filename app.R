@@ -5,6 +5,17 @@ library(shiny)
 source("directoryInput.R")
 library(rhandsontable)
 
+##Setup biomart
+mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                         dataset = "mmusculus_gene_ensembl",
+                         host = 'ensembl.org')
+
+#Get back gene name data for mouse
+t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id",
+                                     "external_gene_name"), mart = mart)
+t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
+                     ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+
 # Define server logic required to create the sleuth object
 server = (function(input, output, session) {
   observeEvent(
@@ -22,7 +33,7 @@ server = (function(input, output, session) {
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
         
-        output$hot <- renderRHandsontable({
+        output$inputVariables <- renderRHandsontable({
           folders = dir(readDirectoryInput(session, 'directory'))
           DF <- data.frame(sample=folders, matrix(ncol = as.numeric(input$numVar)))
           DF[sapply(DF, is.logical)] = lapply(DF[sapply(DF, is.logical)], as.character)
@@ -37,6 +48,17 @@ server = (function(input, output, session) {
             hot_col("sample", readOnly = TRUE)
         })
         
+        #Header for input df
+        output$inputHeader = renderText({
+          return("Input conditions")
+        })
+        
+        #Helper for input df
+        output$inputHelper = renderText({
+          return("Input the conditions for each of the experimental variables. 
+                 Note that there must be a minimum of 2 samples per condition for the analysis.")
+        })
+        
       }
     }
   )
@@ -48,10 +70,23 @@ server = (function(input, output, session) {
     rhandsontable(DF)
   })
   
-  #use output of folders to find all the actual directories with kallisto results
-  #use dir() to find the name of all the sample names
-  #create conditional list(setup thing to create number of conditions to setup)
-  #create table to input manually the conditions
+  test = function(){
+    kal_dirs <- sapply(folders, function(id) file.path(readDirectoryInput(session, 'directory'), id, "output"))
+    
+    #Append location of files per sample
+    s2c <- dplyr::mutate(s2c, path = kal_dirs)
+    
+    #Transcript likelihood
+    so <- sleuth_prep(s2c, ~ condition , target_mapping = t2g)
+    so <- sleuth_fit(so)
+    so <- sleuth_fit(so, ~1, 'reduced')
+    so <- sleuth_lrt(so, 'reduced', 'full')
+    
+    #Gene level
+    soGene <- sleuth_fit(soGene)
+    soGene <- sleuth_fit(soGene, ~1, 'reduced')
+    soGene <- sleuth_lrt(soGene, 'reduced', 'full')
+  }
   
   #setup transcript analysis
   #setup gene level analysis
@@ -82,7 +117,9 @@ ui = (fluidPage(
         column(
           width = 10,
           offset = 1,
-          rHandsontableOutput("hot"),
+          h3(textOutput("inputHeader")),
+          rHandsontableOutput("inputVariables"),
+          helpText(textOutput("inputHelper")),
           selectInput("levelAnalysis", label = h3("Select level of analysis"), 
                       choices = list("transcript" = 1, "gene" = 2), selected = 1),
           selectInput("typeTest", label = h3("Select test"), 
