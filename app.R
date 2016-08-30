@@ -22,19 +22,14 @@ server = (function(input, output, session) {
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
         
-        output$folders = renderText({
-          folders = list.dirs(readDirectoryInput(session, 'directory'), full.names = T, recursive = FALSE)
-          folders
-        })
-        
-        output$samples = renderTable({
-          folders = dir(readDirectoryInput(session, 'directory'))
-          return(data.frame(folders))
-        })
-        
         output$hot <- renderRHandsontable({
           folders = dir(readDirectoryInput(session, 'directory'))
           DF <- data.frame(GENENAME=folders, matrix(ncol = as.numeric(input$numVar)))
+          DF[sapply(DF, is.logical)] = lapply(DF[sapply(DF, is.logical)], as.character)
+          
+          input_data = hot_to_r(input$nameVar)
+          names(DF) = c("GENENAME", input_data$'Variable Names')
+          
           if (!is.null(DF))
             rhandsontable(DF, stretchH = "all") %>%
             hot_col("GENENAME", readOnly = TRUE)
@@ -46,7 +41,7 @@ server = (function(input, output, session) {
   
   output$nameVar <- renderRHandsontable({
     DF <- data.frame(matrix(ncol=1,nrow=as.numeric(input$numVar)))
-    DF[sapply(DF, is.logical),] = lapply(DF[sapply(DF, is.logical)], as.factor)
+    DF[sapply(DF, is.logical),] = lapply(DF[sapply(DF, is.logical)], as.character)
     names(DF) = "Variable Names"
     rhandsontable(DF)
   })
@@ -61,6 +56,7 @@ server = (function(input, output, session) {
   
   #choice of likelihood test or wald test
   #return back sleuth analyzed data
+  
 })
 
 # Define UI for application
@@ -76,15 +72,14 @@ ui = (fluidPage(
                                  "3" = 3, "4" = 4,
                                  "5" = 5), selected = 1),
       helpText("Select the number of condition variables"),
-      rHandsontableOutput("nameVar")
+      rHandsontableOutput("nameVar"),
+      helpText("Enter the names of the condition variables")
     ),
     mainPanel(
       fluidRow(
         column(
           width = 10,
           offset = 1,
-          verbatimTextOutput("folders"),
-          tableOutput("samples"),
           rHandsontableOutput("hot")
           
           #Want to show up table to create dataframe for conditions and a submit so it can save whatever it is
