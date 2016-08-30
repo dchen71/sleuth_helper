@@ -3,6 +3,7 @@
 
 library(shiny)
 source("directoryInput.R")
+library(rhandsontable)
 
 # Define server logic required to create the sleuth object
 server = (function(input, output, session) {
@@ -30,11 +31,25 @@ server = (function(input, output, session) {
           folders = dir(readDirectoryInput(session, 'directory'))
           return(data.frame(folders))
         })
+        
+        output$hot <- renderRHandsontable({
+          folders = dir(readDirectoryInput(session, 'directory'))
+          DF <- data.frame(GENENAME=folders, matrix(ncol = as.numeric(input$numVar)))
+          if (!is.null(DF))
+            rhandsontable(DF, stretchH = "all") %>%
+            hot_col("GENENAME", readOnly = TRUE)
+        })
+        
       }
     }
   )
   
-
+  output$nameVar <- renderRHandsontable({
+    DF <- data.frame(matrix(ncol=1,nrow=as.numeric(input$numVar)))
+    DF[sapply(DF, is.logical),] = lapply(DF[sapply(DF, is.logical)], as.factor)
+    names(DF) = "Variable Names"
+    rhandsontable(DF)
+  })
   
   #use output of folders to find all the actual directories with kallisto results
   #use dir() to find the name of all the sample names
@@ -54,25 +69,29 @@ ui = (fluidPage(
 
   sidebarLayout(
     sidebarPanel(
-      directoryInput('directory', label = 'Select directory', value = '~'),
-      helpText("Select the directory that contains the quantified reads from Kallisto")
+      directoryInput('directory', label = 'Select directory'),
+      helpText("Select the directory that contains the quantified reads from Kallisto"),
+      selectInput("numVar", label = h3("Select number of variables"), 
+                  choices = list("1" = 1, "2" = 2,
+                                 "3" = 3, "4" = 4,
+                                 "5" = 5), selected = 1),
+      helpText("Select the number of condition variables"),
+      rHandsontableOutput("nameVar")
     ),
     mainPanel(
       fluidRow(
-        column(1),
         column(
           width = 10,
-          
-          # Application title
+          offset = 1,
           verbatimTextOutput("folders"),
-          tableOutput("samples")
+          tableOutput("samples"),
+          rHandsontableOutput("hot")
           
           #Want to show up table to create dataframe for conditions and a submit so it can save whatever it is
           #Want to choose transcript/gene level afterwards
           #Want to choose likelihood/wald or both and submit to save it
           #Probably options to get back object, or the whatever files it has
-        ),
-        column(1)
+        )
       )
     )
   )
