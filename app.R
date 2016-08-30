@@ -24,17 +24,17 @@ server = (function(input, output, session) {
         
         output$hot <- renderRHandsontable({
           folders = dir(readDirectoryInput(session, 'directory'))
-          DF <- data.frame(GENENAME=folders, matrix(ncol = as.numeric(input$numVar)))
+          DF <- data.frame(sample=folders, matrix(ncol = as.numeric(input$numVar)))
           DF[sapply(DF, is.logical)] = lapply(DF[sapply(DF, is.logical)], as.character)
           
           input_data = hot_to_r(input$nameVar)
-          if(length(names(DF)) == length(c("GENENAME", input_data$'Variable Names'))){
-            names(DF) = c("GENENAME", input_data$'Variable Names')
+          if(length(names(DF)) == length(c("sample", input_data$'Variable Names'))){
+            names(DF) = c("sample", input_data$'Variable Names')
           }
           
           if (!is.null(DF))
             rhandsontable(DF, stretchH = "all") %>%
-            hot_col("GENENAME", readOnly = TRUE)
+            hot_col("sample", readOnly = TRUE)
         })
         
       }
