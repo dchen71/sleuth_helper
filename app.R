@@ -4,6 +4,7 @@
 library(shiny)
 source("directoryInput.R")
 library(rhandsontable)
+library(sleuth)
 
 ##Setup biomart
 mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
@@ -18,6 +19,7 @@ t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
 
 # Define server logic required to create the sleuth object
 server = (function(input, output, session) {
+  #Observer for directory input
   observeEvent(
     ignoreNULL = TRUE,
     eventExpr = {
@@ -63,6 +65,7 @@ server = (function(input, output, session) {
     }
   )
   
+  #Table to add in the variable names
   output$nameVar <- renderRHandsontable({
     DF <- data.frame(matrix(ncol=1,nrow=as.numeric(input$numVar)))
     DF[sapply(DF, is.logical),] = lapply(DF[sapply(DF, is.logical)], as.character)
@@ -70,29 +73,41 @@ server = (function(input, output, session) {
     rhandsontable(DF)
   })
   
-  test = function(){
+  #Observer to begin processing kallisto objects
+  observeEvent(input$startProcess, {
+    folders = dir(readDirectoryInput(session, 'directory'))
     kal_dirs <- sapply(folders, function(id) file.path(readDirectoryInput(session, 'directory'), id, "output"))
+    
+    s2c = hot_to_r(input$inputVariables)
     
     #Append location of files per sample
     s2c <- dplyr::mutate(s2c, path = kal_dirs)
     
-    #Transcript likelihood
-    so <- sleuth_prep(s2c, ~ condition , target_mapping = t2g)
-    so <- sleuth_fit(so)
-    so <- sleuth_fit(so, ~1, 'reduced')
-    so <- sleuth_lrt(so, 'reduced', 'full')
+    #Transcript or gene level
+    if(input$levelAnalysis == "trans"){
+      so <- sleuth_prep(s2c, ~ condition , target_mapping = t2g)
+    } else if(input$levelAnalysis == "gene"){
+      so <- sleuth_prep(s2c, ~condition, target_mapping = t2g,
+                            aggregation_column = 'ens_gene')
+    }
     
-    #Gene level
-    soGene <- sleuth_fit(soGene)
-    soGene <- sleuth_fit(soGene, ~1, 'reduced')
-    soGene <- sleuth_lrt(soGene, 'reduced', 'full')
-  }
-  
-  #setup transcript analysis
-  #setup gene level analysis
-  
-  #choice of likelihood test or wald test
-  #return back sleuth analyzed data
+    #Wald or likelihood test
+    if(input$typeTest == "lrt"){
+      so <- sleuth_fit(so)
+      so <- sleuth_fit(so, ~1, 'reduced')
+      so <- sleuth_lrt(so, 'reduced', 'full')
+    } else if(input$typeTest == "wald"){
+      
+    }
+    
+    if(exists(so)){
+      output$completeProcess = renderText(return("Model created"))
+    }
+    
+    
+    
+
+  })
   
 })
 
@@ -120,6 +135,7 @@ ui = (fluidPage(
           h3(textOutput("inputHeader")),
           rHandsontableOutput("inputVariables"),
           helpText(textOutput("inputHelper")),
+          #Error with not showing until actual directory has been shown
           conditionalPanel(condition = "(input.directory) > 0",
                            selectInput("levelAnalysis", label = h3("Select level of analysis"), 
                                        choices = list("Transcript" = "trans", "Gene" = "gene"), selected = "trans"),
@@ -142,9 +158,15 @@ ui = (fluidPage(
                                     a statistical model with parameters to be estimated from a sample, the Wald test can be 
                                     used to test the true value of the parameter based on the sample estimate."))
                            ),
-          actionButton("startProcess", "Process"),
-          actionButton("goButton", "Go!"),
-          actionButton("goButton", "Go!")
+          actionButton("startProcess", "Create Sleuth Object"),
+          textOutput("completeProcess"),
+          conditionalPanel(condition = "exists(textOutput('completeProcess')",
+                           h3("cat")),
+          actionButton("saveSleuth", "Save Sleuth Object"),
+          actionButton("createAbun", "Create Kallisto abundance table"),
+          actionButton("createWald", "Create wald test results"),
+          actionButton("convertMat", "Convert to matrix"),
+          textOutput("cat")
           
           #Want to show up table to create dataframe for conditions and a submit so it can save whatever it is
           #Want to choose transcript/gene level afterwards
