@@ -83,11 +83,15 @@ server = (function(input, output, session) {
     #Append location of files per sample
     s2c <- dplyr::mutate(s2c, path = kal_dirs)
     
+    #Find the valid column names
+    variable_names = hot_to_r(input$nameVar)
+    variable_names = variable_names$'Variable Names'
+
     #Transcript or gene level
     if(input$levelAnalysis == "trans"){
-      so <- sleuth_prep(s2c, ~ condition , target_mapping = t2g)
+      so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g)
     } else if(input$levelAnalysis == "gene"){
-      so <- sleuth_prep(s2c, ~condition, target_mapping = t2g,
+      so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g,
                             aggregation_column = 'ens_gene')
     }
     
@@ -100,10 +104,8 @@ server = (function(input, output, session) {
       
     }
     
-    if(exists(so)){
-      output$completeProcess = renderText(return("Model created"))
-    }
-    grep("sample|path" , names(s2c), invert=T)
+    output$completeProcess = renderText(return("Model created"))
+    
   })
   
   observeEvent(input$saveSleuth, {
