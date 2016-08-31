@@ -124,7 +124,7 @@ ui = (fluidPage(
                   choices = list("1" = 1, "2" = 2,
                                  "3" = 3, "4" = 4,
                                  "5" = 5), selected = 1),
-      helpText("Select the number of condition variables"),
+      helpText("Select the number of condition variables to use"),
       rHandsontableOutput("nameVar"),
       helpText("Enter the names of the condition variables. Note that the names path and sample will not work.")
     ),
@@ -157,20 +157,17 @@ ui = (fluidPage(
                                             helpText("The Wald test is a parametric statistical test named after the Hungarian statistician 
                                     Abraham Wald. Whenever a relationship within or between data items can be expressed as 
                                     a statistical model with parameters to be estimated from a sample, the Wald test can be 
-                                    used to test the true value of the parameter based on the sample estimate."))
-                           ),
-          actionButton("startProcess", "Create Sleuth Object"),
-          textOutput("completeProcess"),
-          actionButton("saveSleuth", "Save Sleuth Object"),
-          actionButton("createAbun", "Create Kallisto abundance table"),
-          actionButton("createWald", "Create wald test results"),
-          actionButton("convertMat", "Convert to matrix"),
-          textOutput("cat")
+                                    used to test the true value of the parameter based on the sample estimate.")),
+                           actionButton("startProcess", "Create Sleuth Object"),
+                           textOutput("completeProcess"),
+                           br(),
+                           actionButton("saveSleuth", "Save Sleuth Object"),
+                           actionButton("createAbun", "Create Kallisto abundance table"),
+                           actionButton("createWald", "Create wald test results"),
+                           actionButton("convertMat", "Convert to matrix"),
+                           textOutput("cat")
+                           )
           
-          #Want to show up table to create dataframe for conditions and a submit so it can save whatever it is
-          #Want to choose transcript/gene level afterwards
-          #Want to choose likelihood/wald or both and submit to save it
-          #Probably options to get back object, or the whatever files it has
         )
       )
     )
