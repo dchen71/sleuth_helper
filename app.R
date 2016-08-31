@@ -103,10 +103,11 @@ server = (function(input, output, session) {
     if(exists(so)){
       output$completeProcess = renderText(return("Model created"))
     }
-    
-    
-    
-
+    grep("sample|path" , names(s2c), invert=T)
+  })
+  
+  observeEvent(input$saveSleuth, {
+    save(so, "sleuth_object.RData")
   })
   
 })
@@ -125,7 +126,7 @@ ui = (fluidPage(
                                  "5" = 5), selected = 1),
       helpText("Select the number of condition variables"),
       rHandsontableOutput("nameVar"),
-      helpText("Enter the names of the condition variables")
+      helpText("Enter the names of the condition variables. Note that the names path and sample will not work.")
     ),
     mainPanel(
       fluidRow(
@@ -160,8 +161,6 @@ ui = (fluidPage(
                            ),
           actionButton("startProcess", "Create Sleuth Object"),
           textOutput("completeProcess"),
-          conditionalPanel(condition = "exists(textOutput('completeProcess')",
-                           h3("cat")),
           actionButton("saveSleuth", "Save Sleuth Object"),
           actionButton("createAbun", "Create Kallisto abundance table"),
           actionButton("createWald", "Create wald test results"),
