@@ -108,8 +108,28 @@ server = (function(input, output, session) {
     
   })
   
+  #Save event
   observeEvent(input$saveSleuth, {
     save(so, "sleuth_object.RData")
+    output$completeSave = renderText(return("Object saved"))
+  })
+  
+  #Get kallisto abundance and save
+  observeEvent(input$createAbun, {
+    #kallisto-table
+    output$completeAbun = renderText(return("Abundance table created"))
+  })
+  
+  #Extract wald test results and save
+  observeEvent(input$createWald, {
+    #sleuth_results
+    object$completeWald = renderText(return("Sleuth results created"))
+  })
+  
+  #Convert sleuth object to matrix and save
+  observeEvent(input$createMat, {
+    #sleuth_to_matrix
+    object$completeMat = renderText(return("Object converted to matrix and saved"))
   })
   
 })
@@ -164,10 +184,13 @@ ui = (fluidPage(
                            textOutput("completeProcess"),
                            br(),
                            actionButton("saveSleuth", "Save Sleuth Object"),
+                           textOutput("completeProcess"),
                            actionButton("createAbun", "Create Kallisto abundance table"),
+                           textOutput("completeAbun"),
                            actionButton("createWald", "Create wald test results"),
+                           textOutput("completeWald"),
                            actionButton("convertMat", "Convert to matrix"),
-                           textOutput("cat")
+                           textOutput("completeMat")
                            )
           
         )
