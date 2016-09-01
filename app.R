@@ -47,7 +47,14 @@ server = (function(input, output, session) {
           
           if (!is.null(DF))
             rhandsontable(DF, stretchH = "all") %>%
-            hot_col("sample", readOnly = TRUE)
+              hot_col("sample", readOnly = TRUE) %>%
+              #Validate NA
+              hot_cols(validator = "
+                function (value, callback) {
+                setTimeout(function(){
+                  callback(value != 'NA');
+                }, 300)
+                }", allowInvalid = FALSE)
         })
         
         #Header for input df
@@ -70,7 +77,14 @@ server = (function(input, output, session) {
     DF <- data.frame(matrix(ncol=1,nrow=as.numeric(input$numVar)))
     DF[sapply(DF, is.logical),] = lapply(DF[sapply(DF, is.logical)], as.character)
     names(DF) = "Variable Names"
-    rhandsontable(DF)
+    rhandsontable(DF) %>%
+      #Validate NA
+      hot_cols(validator = "
+              function (value, callback) {
+              setTimeout(function(){
+                callback(value != 'NA');
+              }, 300)
+              }", allowInvalid = FALSE)
   })
   
   #Observer to begin processing kallisto objects
