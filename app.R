@@ -104,32 +104,32 @@ server = (function(input, output, session) {
       
     }
     
-    output$completeProcess = renderText(return("Model created"))
+    output$createModel = renderText({return("Model created")})
     
   })
   
   #Save event
   observeEvent(input$saveSleuth, {
     save(so, "sleuth_object.RData")
-    output$completeSave = renderText(return("Object saved"))
+    output$completeSave = renderText({return("Object saved")})
   })
   
   #Get kallisto abundance and save
   observeEvent(input$createAbun, {
     #kallisto-table
-    output$completeAbun = renderText(return("Abundance table created"))
+    output$completeAbun = renderText({return("Abundance table created")})
   })
   
   #Extract wald test results and save
   observeEvent(input$createWald, {
     #sleuth_results
-    object$completeWald = renderText(return("Sleuth results created"))
+    object$completeWald = renderText({return("Sleuth results created")})
   })
   
   #Convert sleuth object to matrix and save
   observeEvent(input$createMat, {
     #sleuth_to_matrix
-    object$completeMat = renderText(return("Object converted to matrix and saved"))
+    object$completeMat = renderText({return("Object converted to matrix and saved")})
   })
   
 })
@@ -181,10 +181,10 @@ ui = (fluidPage(
                                     a statistical model with parameters to be estimated from a sample, the Wald test can be 
                                     used to test the true value of the parameter based on the sample estimate.")),
                            actionButton("startProcess", "Create Sleuth Object"),
-                           textOutput("completeProcess"),
+                           textOutput("createModel"),
                            br(),
                            actionButton("saveSleuth", "Save Sleuth Object"),
-                           textOutput("completeProcess"),
+                           textOutput("completeSave"),
                            actionButton("createAbun", "Create Kallisto abundance table"),
                            textOutput("completeAbun"),
                            actionButton("createWald", "Create wald test results"),
