@@ -141,11 +141,11 @@ server = (function(input, output, session) {
   observeEvent(input$createWald, {
     #sleuth_results
     if(input$typeTest == "lrt"){
-      write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), "sleuth_results.csv")
+      write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), file="sleuth_results.csv")
     } else if (input$typeTest == "wald"){
       
     }
-    object$completeWald = renderText({return("Sleuth results created")})
+    output$completeWald = renderText({return("Sleuth results created")})
   })
   
 })
