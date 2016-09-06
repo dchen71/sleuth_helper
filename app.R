@@ -30,7 +30,7 @@ server = (function(input, output, session) {
         # condition prevents handler execution on initial app launch
         
         # launch the directory selection dialog with initial path read from the widget
-        path = choose.dir(default = readDirectoryInput(session, 'directory'))
+        path <<- choose.dir(default = readDirectoryInput(session, 'directory'))
         
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
@@ -52,7 +52,9 @@ server = (function(input, output, session) {
               hot_cols(validator = "
                 function (value, callback) {
                 setTimeout(function(){
-                  callback(value != 'NA');
+                  callback(
+                    value != 'NA'
+                  );
                 }, 300)
                 }", allowInvalid = FALSE)
         })
@@ -113,7 +115,7 @@ server = (function(input, output, session) {
     if(input$typeTest == "lrt"){
       so <- sleuth_fit(so)
       so <- sleuth_fit(so, ~1, 'reduced')
-      so <- sleuth_lrt(so, 'reduced', 'full')
+      so <<- sleuth_lrt(so, 'reduced', 'full')
     } else if(input$typeTest == "wald"){
       
     }
@@ -124,7 +126,7 @@ server = (function(input, output, session) {
   
   #Save event
   observeEvent(input$saveSleuth, {
-    save(so, "sleuth_object.RData")
+    save(so, file="sleuth_object.RData")
     output$completeSave = renderText({return("Object saved")})
   })
   
@@ -162,7 +164,7 @@ ui = (fluidPage(
                                  "5" = 5), selected = 1),
       helpText("Select the number of condition variables to use"),
       rHandsontableOutput("nameVar"),
-      helpText("Enter the names of the condition variables. Note that the names path and sample will not work.")
+      helpText("Enter the names of the condition variables. Note that the names: path and sample, are reserved names for Sleuth.")
     ),
     mainPanel(
       fluidRow(
