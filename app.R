@@ -140,13 +140,12 @@ server = (function(input, output, session) {
   #Extract wald test results and save
   observeEvent(input$createWald, {
     #sleuth_results
+    if(input$typeTest == "lrt"){
+      write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), "sleuth_results.csv")
+    } else if (input$typeTest == "wald"){
+      
+    }
     object$completeWald = renderText({return("Sleuth results created")})
-  })
-  
-  #Convert sleuth object to matrix and save
-  observeEvent(input$createMat, {
-    #sleuth_to_matrix
-    object$completeMat = renderText({return("Object converted to matrix and saved")})
   })
   
 })
@@ -205,9 +204,7 @@ ui = (fluidPage(
                            actionButton("createAbun", "Create Kallisto abundance table"),
                            textOutput("completeAbun"),
                            actionButton("createWald", "Create wald test results"),
-                           textOutput("completeWald"),
-                           actionButton("convertMat", "Convert to matrix"),
-                           textOutput("completeMat")
+                           textOutput("completeWald")
                            )
           
         )
