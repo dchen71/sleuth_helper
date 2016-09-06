@@ -179,7 +179,7 @@ ui = (fluidPage(
                            selectInput("levelAnalysis", label = h3("Select level of analysis"), 
                                        choices = list("Transcript" = "trans", "Gene" = "gene"), selected = "trans"),
                            selectInput("typeTest", label = h3("Select test"), 
-                                       choices = list("Likelihood Ratio Test" = "lrt", "Wald Test" = "wald"), selected = "lrt"),
+                                       choices = list("Likelihood Ratio Test" = "lrt"), selected = "lrt"),
                            conditionalPanel(condition= "input.typeTest == 'lrt'",
                                             helpText("The likelihood ratio test is a statistical test used to compare the goodness of fit of 
                                     two models, one of which (the null model) is a special case of the other 
@@ -203,7 +203,7 @@ ui = (fluidPage(
                            textOutput("completeSave"),
                            actionButton("createAbun", "Create Kallisto abundance table"),
                            textOutput("completeAbun"),
-                           actionButton("createWald", "Create wald test results"),
+                           actionButton("createWald", "Create test results"),
                            textOutput("completeWald")
                            )
           
