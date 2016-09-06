@@ -2,7 +2,7 @@
 #using the sleuth app
 
 library(shiny)
-source("directoryInput.R")
+source("scripts/directoryInput.R")
 library(rhandsontable)
 library(sleuth)
 
