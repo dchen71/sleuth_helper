@@ -117,9 +117,7 @@ server = (function(input, output, session) {
       so <- sleuth_fit(so)
       so <- sleuth_fit(so, ~1, 'reduced')
       so <<- sleuth_lrt(so, 'reduced', 'full')
-    } else if(input$typeTest == "wald"){
-      
-    }
+    } 
     
     output$createModel = renderText({return("Model created")})
     
@@ -142,9 +140,8 @@ server = (function(input, output, session) {
     #sleuth_results
     if(input$typeTest == "lrt"){
       write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), file="sleuth_results.csv")
-    } else if (input$typeTest == "wald"){
-      
-    }
+    } 
+    
     output$completeWald = renderText({return("Sleuth results created")})
   })
   
@@ -191,11 +188,6 @@ ui = (fluidPage(
                                     the likelihood ratio is used, the statistic is known as a log-likelihood ratio 
                                     statistic, and the probability distribution of this test statistic, assuming that 
                                     the null model is true, can be approximated using Wilks’ theorem.")),
-                           conditionalPanel(condition= "input.typeTest == 'wald'",
-                                            helpText("The Wald test is a parametric statistical test named after the Hungarian statistician 
-                                    Abraham Wald. Whenever a relationship within or between data items can be expressed as 
-                                    a statistical model with parameters to be estimated from a sample, the Wald test can be 
-                                    used to test the true value of the parameter based on the sample estimate.")),
                            actionButton("startProcess", "Create Sleuth Object"),
                            textOutput("createModel"),
                            br(),
