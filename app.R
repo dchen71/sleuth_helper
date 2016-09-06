@@ -30,7 +30,7 @@ server = (function(input, output, session) {
         # condition prevents handler execution on initial app launch
         
         # launch the directory selection dialog with initial path read from the widget
-        path <<- choose.dir(default = readDirectoryInput(session, 'directory'))
+        path <- choose.dir(default = readDirectoryInput(session, 'directory'))
         
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
@@ -92,6 +92,7 @@ server = (function(input, output, session) {
   #Observer to begin processing kallisto objects
   observeEvent(input$startProcess, {
     folders = dir(readDirectoryInput(session, 'directory'))
+    #Can add validation here to make sure that the output folder in each sample is present
     kal_dirs <- sapply(folders, function(id) file.path(readDirectoryInput(session, 'directory'), id, "output"))
     
     s2c = hot_to_r(input$inputVariables)
@@ -130,9 +131,9 @@ server = (function(input, output, session) {
     output$completeSave = renderText({return("Object saved")})
   })
   
-  #Get kallisto abundance and save
+  #Get kallisto abundance and save as csv
   observeEvent(input$createAbun, {
-    #kallisto-table
+    write.csv(kallisto_table(so), "kallisto_table.csv")
     output$completeAbun = renderText({return("Abundance table created")})
   })
   
