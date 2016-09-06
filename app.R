@@ -84,7 +84,7 @@ server = (function(input, output, session) {
       hot_cols(validator = "
               function (value, callback) {
               setTimeout(function(){
-                callback(value != 'NA');
+                callback(value != 'NA' && value != 'path' && value != 'sample');
               }, 300)
               }", allowInvalid = FALSE)
   })
