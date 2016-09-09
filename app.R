@@ -5,6 +5,8 @@ library(shiny)
 source("scripts/directoryInput.R")
 library(rhandsontable)
 library(sleuth)
+library(shinyjs)
+
 
 ##Setup biomart
 mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
@@ -19,6 +21,12 @@ t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
 
 # Define server logic required to create the sleuth object
 server = (function(input, output, session) {
+  # Init hiding of loading element
+  hide("loading-1")
+  hide("loading-2")
+  hide("loading-3")
+  hide("loading-4")
+  
   #Observer for directory input
   observeEvent(
     ignoreNULL = TRUE,
@@ -91,6 +99,8 @@ server = (function(input, output, session) {
   
   #Observer to begin processing kallisto objects
   observeEvent(input$startProcess, {
+    show(id="loading-1")
+    
     folders = dir(readDirectoryInput(session, 'directory'))
     #Can add validation here to make sure that the output folder in each sample is present
     kal_dirs <- sapply(folders, function(id) file.path(readDirectoryInput(session, 'directory'), id, "output"))
@@ -119,36 +129,42 @@ server = (function(input, output, session) {
       so <<- sleuth_lrt(so, 'reduced', 'full')
     } 
     
+    hide(id="loading-1")
     output$createModel = renderText({return("Model created")})
     
   })
   
   #Save event
   observeEvent(input$saveSleuth, {
+    show(id="loading-2")
     save(so, file="sleuth_object.RData")
+    hide(id="loading-2")
     output$completeSave = renderText({return("Object saved")})
   })
   
   #Get kallisto abundance and save as csv
   observeEvent(input$createAbun, {
+    show(id="loading-3")
     write.csv(kallisto_table(so), "kallisto_table.csv")
+    hide(id="loading-3")
     output$completeAbun = renderText({return("Abundance table created")})
   })
   
   #Extract wald test results and save
   observeEvent(input$createWald, {
     #sleuth_results
+    show(id="loading-4")
     if(input$typeTest == "lrt"){
       write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), file="sleuth_results.csv")
     } 
-    
+    hide(id="loading-4")
     output$completeWald = renderText({return("Sleuth results created")})
   })
-  
 })
 
 # Define UI for application
 ui = (fluidPage(
+  useShinyjs(),
   titlePanel("Sleuth Helper"),
 
   sidebarLayout(
@@ -189,16 +205,23 @@ ui = (fluidPage(
                                     statistic, and the probability distribution of this test statistic, assuming that 
                                     the null model is true, can be approximated using Wilks’ theorem.")),
                            actionButton("startProcess", "Create Sleuth Object"),
+                           br(),
+                           tags$img(src="spinner.gif", id="loading-1"),
                            textOutput("createModel"),
                            br(),
                            actionButton("saveSleuth", "Save Sleuth Object"),
+                           br(),
+                           tags$img(src="spinner.gif", id="loading-2"),
                            textOutput("completeSave"),
                            actionButton("createAbun", "Create Kallisto abundance table"),
+                           br(),
+                           tags$img(src="spinner.gif", id="loading-3"),
                            textOutput("completeAbun"),
+                           br(),
                            actionButton("createWald", "Create test results"),
+                           tags$img(src="spinner.gif", id="loading-4"),
                            textOutput("completeWald")
                            )
-          
         )
       )
     )
