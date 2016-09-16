@@ -26,6 +26,7 @@ server = (function(input, output, session) {
   hide("loading-2")
   hide("loading-3")
   hide("loading-4")
+  hide("loading-5")
   
   #Observer for directory input
   observeEvent(
@@ -145,19 +146,30 @@ server = (function(input, output, session) {
   #Get kallisto abundance and save as csv
   observeEvent(input$createAbun, {
     show(id="loading-3")
-    write.csv(kallisto_table(so), "kallisto_table.csv")
+    write.csv(kallisto_table(so), file="kallisto_table.csv", row.names = FALSE)
     hide(id="loading-3")
     output$completeAbun = renderText({return("Abundance table created")})
+  })
+  
+  #Extract gene table results and save
+  observeEvent(input$createTable, {
+    #sleuth_results
+    show(id="loading-4")
+    if(input$typeTest == "lrt"){
+      write.csv(sleuth_gene_table(so,"reduced:full", test_type="lrt"), file="sleuth_gene_table.csv", row.names=FALSE)
+    } 
+    hide(id="loading-4")
+    output$completeTable = renderText({return("Sleuth gene table created")})
   })
   
   #Extract wald test results and save
   observeEvent(input$createWald, {
     #sleuth_results
-    show(id="loading-4")
+    show(id="loading-5")
     if(input$typeTest == "lrt"){
-      write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), file="sleuth_results.csv")
+      write.csv(sleuth_results(so,"reduced:full", test_type="lrt"), file="sleuth_results.csv", row.names=FALSE)
     } 
-    hide(id="loading-4")
+    hide(id="loading-5")
     output$completeWald = renderText({return("Sleuth results created")})
   })
 })
@@ -206,23 +218,32 @@ ui = (fluidPage(
                                     the null model is true, can be approximated using Wilks’ theorem.")),
                            actionButton("startProcess", "Create Sleuth Object"),
                            br(),
+                           helpText("Create model based on parameters for further examination via Sleuth"),
                            tags$img(src="spinner.gif", id="loading-1"),
                            textOutput("createModel"),
-                           helpText("Create model based on parameters for further examination via Sleuth"),
                            br(),
                            actionButton("saveSleuth", "Save Sleuth Object"),
+                           br(),
                            helpText("Save the object for future usage in current working directory"),
                            tags$img(src="spinner.gif", id="loading-2"),
                            textOutput("completeSave"),
                            br(),
                            actionButton("createAbun", "Create Kallisto abundance table"),
-                           helpText("Create an abundance table containing information about transcripts, length, abundance, etc"),
+                           br(),
+                           helpText("Create an abundance table containing information about transcripts, length, abundance, etc and save to current directory"),
                            tags$img(src="spinner.gif", id="loading-3"),
                            textOutput("completeAbun"),
                            br(),
-                           actionButton("createWald", "Create test results"),
-                           helpText("Creates table showing test results from sleuth object"),
+                           actionButton("createTable", "Create test results"),
+                           br(),
+                           helpText("Creates table showing which genes most significantly mapping to transcript and save in current working firectory"),
                            tags$img(src="spinner.gif", id="loading-4"),
+                           textOutput("completeTable"),
+                           br(),
+                           actionButton("createWald", "Create test results"),
+                           br(),
+                           helpText("Creates table showing test results from sleuth object and save to current directory and save to current working directory"),
+                           tags$img(src="spinner.gif", id="loading-5"),
                            textOutput("completeWald"),
                            br()
                            )
