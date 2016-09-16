@@ -208,19 +208,23 @@ ui = (fluidPage(
                            br(),
                            tags$img(src="spinner.gif", id="loading-1"),
                            textOutput("createModel"),
+                           helpText("Create model based on parameters for further examination via Sleuth"),
                            br(),
                            actionButton("saveSleuth", "Save Sleuth Object"),
-                           br(),
+                           helpText("Save the object for future usage in current working directory"),
                            tags$img(src="spinner.gif", id="loading-2"),
                            textOutput("completeSave"),
-                           actionButton("createAbun", "Create Kallisto abundance table"),
                            br(),
+                           actionButton("createAbun", "Create Kallisto abundance table"),
+                           helpText("Create an abundance table containing information about transcripts, length, abundance, etc"),
                            tags$img(src="spinner.gif", id="loading-3"),
                            textOutput("completeAbun"),
                            br(),
                            actionButton("createWald", "Create test results"),
+                           helpText("Creates table showing test results from sleuth object"),
                            tags$img(src="spinner.gif", id="loading-4"),
-                           textOutput("completeWald")
+                           textOutput("completeWald"),
+                           br()
                            )
         )
       )
