@@ -156,8 +156,8 @@ server = (function(input, output, session) {
       so <- sleuth_fit(so, ~1, 'reduced')
       so <<- sleuth_lrt(so, 'reduced', 'full')
       
-      output$createModel = renderText({return("Model created")})
-      output$modelCreate = renderText({return("Model Successful")}) #Lazy validation
+      output$createModel = renderText({return("")})
+      output$modelCreated = renderText({return("Model created")}) #Lazy validation
     } else {
       output$createModel = renderText({return("Error: One or more directories does not contain Kallisto reads")})
     }
@@ -252,9 +252,10 @@ ui = (fluidPage(
                            helpText("Create model based on parameters for further examination via Sleuth"),
                            tags$img(src="spinner.gif", id="loading-1"),
                            textOutput("createModel"),
+                           textOutput("modelCreated"),
                            br()
                            ),
-          conditionalPanel(condition = "(output.modelCreate)",
+          conditionalPanel(condition = "(output.modelCreated)",
                            actionButton("saveSleuth", "Save Sleuth Object"),
                            br(),
                            helpText("Save the object for future usage in current working directory"),
