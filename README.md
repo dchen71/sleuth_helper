@@ -34,4 +34,4 @@ https://pachterlab.github.io/kallisto/
 https://github.com/pachterlab/sleuth
 
 #Limitations
-The app only works locally and only on Mac and Linux OS.
+The app only works locally.
