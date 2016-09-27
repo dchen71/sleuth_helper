@@ -44,6 +44,11 @@ server = (function(input, output, session) {
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
         
+        if(is.na(path)){
+          #If cancel, then don't run the rest
+          return(FALSE)
+        }
+        
         output$inputVariables <- renderRHandsontable({
           folders = dir(readDirectoryInput(session, 'directory'))
           DF <- data.frame(sample=folders, matrix(ncol = as.numeric(input$numVar)))
@@ -208,7 +213,7 @@ ui = (fluidPage(
           rHandsontableOutput("inputVariables"),
           helpText(textOutput("inputHelper")),
           #Error with not showing until actual directory has been shown
-          conditionalPanel(condition = "(input.directory) > 0",
+          conditionalPanel(condition = "(output.inputVariables)",
                            selectInput("levelAnalysis", label = h3("Select level of analysis"), 
                                        choices = list("Transcript" = "trans", "Gene" = "gene"), selected = "trans"),
                            selectInput("typeTest", label = h3("Select test"), 
@@ -255,7 +260,8 @@ ui = (fluidPage(
                            helpText("Creates table showing test results from sleuth object and save to current directory and save to current working directory"),
                            tags$img(src="spinner.gif", id="loading-5"),
                            textOutput("completeWald"),
-                           br())
+                           br()
+                           )
         )
       )
     )
