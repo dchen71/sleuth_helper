@@ -119,9 +119,20 @@ server = (function(input, output, session) {
     variable_names = hot_to_r(input$nameVar)
     variable_names = variable_names$'Variable Names'
     
+    #Check to make sure there are at least 2 factors in each col
+    num_factors = TRUE
+    for(i in var_names){
+      if(length(levels(test[,i])) < 2){
+        num_factors = FALSE
+        break
+      }
+    }
+    
     #Validate level of factors to be at least 2
-    if(FALSE){
+    if(num_factors == FALSE){
       hide(id="loading-1")
+      output$createModel = renderText({return("Error: One or more variables has less than two factors")})
+      return(FALSE)
     }
 
     if(length(grep("abundance.h5", dir(s2c$path))) == nrow(s2c)){
@@ -202,7 +213,7 @@ ui = (fluidPage(
                                  "5" = 5), selected = 1),
       helpText("Select the number of condition variables to use"),
       rHandsontableOutput("nameVar"),
-      helpText("Enter the names of the condition variables. Note that the names: path and sample, are reserved names for Sleuth.")
+      helpText("Enter unique names for the condition variables. Note that the names: path and sample, are reserved names for Sleuth.")
     ),
     mainPanel(
       fluidRow(
