@@ -134,6 +134,13 @@ server = (function(input, output, session) {
       output$createModel = renderText({return("Error: One or more variables has less than two factors")})
       return(FALSE)
     }
+    
+    #Validate unique variable names
+    if(length(unique(var_names)) != length(var_names)){
+      hide(id="loading-1")
+      output$createModel = renderText({return("Error: Variable names are not unique")})
+      return(FALSE) 
+    }
 
     if(length(grep("abundance.h5", dir(s2c$path))) == nrow(s2c)){
       #Transcript or gene level
