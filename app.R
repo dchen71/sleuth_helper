@@ -103,7 +103,6 @@ server = (function(input, output, session) {
     show(id="loading-1")
     
     folders = dir(readDirectoryInput(session, 'directory'))
-    #Can add validation here to make sure that the output folder in each sample is present
     kal_dirs <- sapply(folders, function(id) file.path(readDirectoryInput(session, 'directory'), id, "output"))
     
     s2c = hot_to_r(input$inputVariables)
@@ -114,6 +113,11 @@ server = (function(input, output, session) {
     #Find the valid column names
     variable_names = hot_to_r(input$nameVar)
     variable_names = variable_names$'Variable Names'
+    
+    #Validate level of factors to be at least 2
+    if(FALSE){
+      hide(id="loading-1")
+    }
 
     if(length(grep("abundance.h5", dir(s2c$path))) == nrow(s2c)){
       #Transcript or gene level
@@ -225,7 +229,9 @@ ui = (fluidPage(
                            helpText("Create model based on parameters for further examination via Sleuth"),
                            tags$img(src="spinner.gif", id="loading-1"),
                            textOutput("createModel"),
-                           br(),
+                           br()
+                           ),
+          conditionalPanel(condition = "(output.createModel)",
                            actionButton("saveSleuth", "Save Sleuth Object"),
                            br(),
                            helpText("Save the object for future usage in current working directory"),
@@ -249,8 +255,7 @@ ui = (fluidPage(
                            helpText("Creates table showing test results from sleuth object and save to current directory and save to current working directory"),
                            tags$img(src="spinner.gif", id="loading-5"),
                            textOutput("completeWald"),
-                           br()
-                           )
+                           br())
         )
       )
     )
