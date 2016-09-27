@@ -115,23 +115,27 @@ server = (function(input, output, session) {
     variable_names = hot_to_r(input$nameVar)
     variable_names = variable_names$'Variable Names'
 
-    #Transcript or gene level
-    if(input$levelAnalysis == "trans"){
-      so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g)
-    } else if(input$levelAnalysis == "gene"){
-      so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g,
-                            aggregation_column = 'ens_gene')
-    }
-    
-    #Wald or likelihood test
-    if(input$typeTest == "lrt"){
+    if(length(grep("abundance.h5", dir(s2c$path))) == nrow(s2c)){
+      #Transcript or gene level
+      if(input$levelAnalysis == "trans"){
+        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g)
+      } else if(input$levelAnalysis == "gene"){
+        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g,
+                          aggregation_column = 'ens_gene')
+      }
+      
+      #Likelihood test
       so <- sleuth_fit(so)
       so <- sleuth_fit(so, ~1, 'reduced')
       so <<- sleuth_lrt(so, 'reduced', 'full')
-    } 
+      
+      output$createModel = renderText({return("Model created")})
+    } else {
+      output$createModel = renderText({return("Error: One or more directories does not contain Kallisto reads")})
+    }
     
     hide(id="loading-1")
-    output$createModel = renderText({return("Model created")})
+    
     
   })
   
