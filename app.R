@@ -121,8 +121,8 @@ server = (function(input, output, session) {
     
     #Check to make sure there are at least 2 factors in each col
     num_factors = TRUE
-    for(i in var_names){
-      if(length(levels(test[,i])) < 2){
+    for(i in variable_names){
+      if(length(levels(as.factor(s2c[,i]))) < 2){
         num_factors = FALSE
         break
       }
@@ -136,7 +136,7 @@ server = (function(input, output, session) {
     }
     
     #Validate unique variable names
-    if(length(unique(var_names)) != length(var_names)){
+    if(length(unique(variable_names)) != length(variable_names)){
       hide(id="loading-1")
       output$createModel = renderText({return("Error: Variable names are not unique")})
       return(FALSE) 
@@ -157,6 +157,7 @@ server = (function(input, output, session) {
       so <<- sleuth_lrt(so, 'reduced', 'full')
       
       output$createModel = renderText({return("Model created")})
+      output$modelCreate = renderText({return("Model Successful")}) #Lazy validation
     } else {
       output$createModel = renderText({return("Error: One or more directories does not contain Kallisto reads")})
     }
@@ -230,7 +231,6 @@ ui = (fluidPage(
           h3(textOutput("inputHeader")),
           rHandsontableOutput("inputVariables"),
           helpText(textOutput("inputHelper")),
-          #Error with not showing until actual directory has been shown
           conditionalPanel(condition = "(output.inputVariables)",
                            selectInput("levelAnalysis", label = h3("Select level of analysis"), 
                                        choices = list("Transcript" = "trans", "Gene" = "gene"), selected = "trans"),
@@ -254,7 +254,7 @@ ui = (fluidPage(
                            textOutput("createModel"),
                            br()
                            ),
-          conditionalPanel(condition = "(output.createModel)",
+          conditionalPanel(condition = "(output.modelCreate)",
                            actionButton("saveSleuth", "Save Sleuth Object"),
                            br(),
                            helpText("Save the object for future usage in current working directory"),
