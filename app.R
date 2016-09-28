@@ -7,20 +7,13 @@ library(rhandsontable)
 library(sleuth)
 library(shinyjs)
 
-
-##Setup biomart
-mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                         dataset = "mmusculus_gene_ensembl",
-                         host = 'ensembl.org')
-
-#Get back gene name data for mouse
-t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id",
-                                     "external_gene_name"), mart = mart)
-t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
-                     ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
-
 # Define server logic required to create the sleuth object
 server = (function(input, output, session) {
+  #Load in transcript/gene name data
+  t2g = reactive({
+    read.csv("www/t2g.csv")
+  })
+  
   # Init hiding of loading element
   hide("loading-1")
   hide("loading-2")
@@ -145,9 +138,9 @@ server = (function(input, output, session) {
     if(length(grep("abundance.h5", dir(s2c$path))) == nrow(s2c)){
       #Transcript or gene level
       if(input$levelAnalysis == "trans"){
-        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g)
+        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g())
       } else if(input$levelAnalysis == "gene"){
-        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g,
+        so <- sleuth_prep(s2c, as.formula((paste("~",paste(variable_names,collapse="+")))) , target_mapping = t2g(),
                           aggregation_column = 'ens_gene')
       }
       
